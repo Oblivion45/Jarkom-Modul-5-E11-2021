@@ -66,8 +66,156 @@ maka didapatkan ip pada masing-masing subnet sebagai berikut :
 ## C . Routing
 diharuskan melakukan Routing agar setiap perangkat pada jaringan tersebut dapat terhubung.
 
+Dengan melakukan Rooting pada node `Foosha` seperti berikut
+
+### FOOSHA
+
+```
+route add -net 192.205.0.16 netmask 255.255.255.248 gw 192.205.0.2
+
+route add -net 192.205.4.0 netmask 255.255.252.0 gw 192.205.0.2
+
+route add -net 192.205.0.128 netmask 255.255.255.128 gw 192.205.0.2
+
+route add -net 192.205.1.0 netmask 255.255.255.0 gw 192.205.0.6
+
+route add -net 192.205.2.0 netmask 255.255.254.0 gw 192.205.0.6
+
+route add -net 192.205.0.24 netmask 255.255.255.248 gw 192.205.0.6
+```
+
 ## D . Pemberian IP
 Tugas berikutnya adalah memberikan ip pada subnet Blueno, Cipher, Fukurou, dan Elena secara dinamis menggunakan bantuan DHCP server. Kemudian kalian ingat bahwa kalian harus setting DHCP Relay pada router yang menghubungkannya.
+
+### Setting DHCP Relay 
+
+dengan meletakkan command tersebut di script masing masing 
+
+#### FOOSHA
+
+```
+apt-get update
+apt-get install isc-dhcp-relay -y
+
+echo '
+# Defaults for isc-dhcp-relay initscript
+# sourced by /etc/init.d/isc-dhcp-relay
+# installed at /etc/default/isc-dhcp-relay by the maintainer scripts
+
+#
+# This is a POSIX shell fragment
+#
+
+# What servers should the DHCP relay forward requests to?
+SERVERS="192.205.0.19"
+
+# On what interfaces should the DHCP relay (dhrelay) serve DHCP requests?
+INTERFACES="eth0 eth1 eth2 "
+
+# Additional options that are passed to the DHCP relay daemon?
+OPTIONS=""
+' > /etc/default/isc-dhcp-relay
+
+/etc/init.d/isc-dhcp-relay restart
+
+```
+
+#### Water7
+
+```
+apt-get update 
+apt-get install isc-dhcp-relay -y
+
+echo '
+# Defaults for isc-dhcp-relay initscript
+# sourced by /etc/init.d/isc-dhcp-relay
+# installed at /etc/default/isc-dhcp-relay by the maintainer scripts
+
+#
+# This is a POSIX shell fragment
+#
+
+# What servers should the DHCP relay forward requests to?
+SERVERS="192.205.0.19"
+
+# On what interfaces should the DHCP relay (dhrelay) serve DHCP requests?
+INTERFACES="eth0 eth1 eth2 eth3"
+
+# Additional options that are passed to the DHCP relay daemon?
+OPTIONS=""
+' > /etc/default/isc-dhcp-relay
+
+/etc/init.d/isc-dhcp-relay restart
+
+```
+
+#### Guanhao
+
+```
+apt-get update
+apt-get install isc-dhcp-server -y
+
+echo '
+
+INTERFACES="eth0" ' >/etc/default/isc-dhcp-server
+
+option domain-name "example.org";
+option domain-name-servers ns1.example.org, ns2.example.org;
+
+default-lease-time 600;
+max-lease-time 7200;
+
+log-facility local7;
+
+subnet 192.205.0.128 netmask 255.255.255.128 {
+        range 192.205.0.131 192.205.0.232;
+        option routers 192.205.0.129;
+        option broadcast-address 192.205.0.255;
+        option domain-name-servers 192.168.122.1;
+        default-lease-time 720;
+        max-lease-time 720;
+        }
+
+subnet 192.205.1.0 netmask 255.255.255.0 {
+        range 192.205.1.3 192.205.1.104;
+        option routers 192.205.1.1;
+        option broadcast-address 192.205.1.255;
+        option domain-name-servers 192.168.122.1;
+        default-lease-time 720;
+        max-lease-time 720;
+        }
+
+        subnet 192.205.4.0 netmask 255.255.252.0 {
+        range 192.205.4.3 192.205.6.195;
+        option routers 192.205.4.1;
+        option broadcast-address 192.205.4.255;
+        option domain-name-servers 192.168.122.1;
+        default-lease-time 720;
+        max-lease-time 720;
+        }
+
+subnet 192.205.0.16 netmask 255.255.255.248 {
+        option routers 192.205.0.17;
+        option broadcast-address 192.205.0.255;
+        }
+ subnet 192.205.0.24 netmask 255.255.255.248 {
+        option routers 192.205.0.25;
+        option broadcast-address 192.205.0.255;
+        }
+subnet 192.205.0.4 netmask 255.255.255.252 {
+        option routers 192.205.0.5;
+        option broadcast-address 192.205.0.255;
+        }
+
+        subnet 192.205.0.0 netmask 255.255.255.252 {
+        option routers 192.205.0.1;
+        option broadcast-address 192.205.0.255;
+        } ' > /etc/dhcp/dhcpd.conf
+
+service isc-dhcp-server restart
+
+```
+
 
 ## Soal 1
 Agar topologi yang kalian buat dapat mengakses keluar, kalian diminta untuk mengkonfigurasi Foosha menggunakan iptables, tetapi Luffy tidak ingin menggunakan MASQUERADE.
@@ -78,7 +226,6 @@ Untuk Dapat melakukan konfigurasi Foosha tanpa MASQUERADE maka kami menggunakan 
 iptables -F
 iptables -t nat -F
 iptables -t nat -A POSTROUTING -s 192.205.0.0/16 -o eth0 -j SNAT --to 192.168.1$.168.122.223
-
 ```
 Dengan cara tersebut maka dapat berjalan tanpa MASQUERADE.
 
