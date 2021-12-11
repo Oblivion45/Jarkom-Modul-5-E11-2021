@@ -87,6 +87,184 @@ route add -net 192.205.0.24 netmask 255.255.255.248 gw 192.205.0.6
 ## D . Pemberian IP
 Tugas berikutnya adalah memberikan ip pada subnet Blueno, Cipher, Fukurou, dan Elena secara dinamis menggunakan bantuan DHCP server. Kemudian kalian ingat bahwa kalian harus setting DHCP Relay pada router yang menghubungkannya.
 
+### Setting GNS3
+
+#### FOOSHA
+
+Konfigurasi sebagai DHCP Relay dan Router
+
+```
+auto eth0
+iface eth0 inet dhcp
+
+auto eth1
+iface eth1 inet static
+	address 192.205.0.1
+	netmask 255.255.255.252
+	
+auto eth2
+iface eth2 inet static
+	address 192.205.0.5
+	netmask 255.255.255.252
+
+```
+
+#### Guanhao
+
+Konfigurasi sebagai DHCP Relay dan Router
+
+```
+auto eth0
+iface eth0 inet static
+	address 192.205.0.6
+	netmask 255.255.255.252
+	gateway 192.205.0.5
+
+auto eth1
+iface eth1 inet static
+	address 192.205.2.1
+	netmask 255.255.254.0
+
+auto eth2
+iface eth2 inet static
+	address 192.205.1.1
+	netmask 255.255.255.0
+
+auto eth3
+iface eth3 inet static
+	address 192.205.0.25
+	netmask 255.255.255.248
+
+```
+
+#### Water7
+
+Konfigurasi sebagai DHCP Relay dan Router
+
+```
+auto eth0
+iface eth0 inet static
+	address 192.205.0.2
+	netmask 255.255.255.252
+	gateway 192.205.0.1
+
+auto eth1
+iface eth1 inet static
+	address 192.205.0.129
+	netmask 255.255.255.128
+
+auto eth2
+iface eth2 inet static
+	address 192.205.0.17
+	netmask 255.255.255.248
+
+auto eth3
+iface eth3 inet static
+	address 192.205.4.1
+	netmask 255.255.252.0
+
+```
+
+#### Doriki
+
+Konfigurasi sebagai DNS Server
+
+```
+auto eth0
+iface eth0 inet static
+	address 192.205.0.18
+	netmask 255.255.255.248
+gateway 192.205.0.17
+
+```
+
+#### Jipangu
+
+Konfigurasi sebagai DNS Server
+
+```
+auto eth0
+iface eth0 inet static
+	address 192.205.0.19
+	netmask 255.255.255.252
+gateway 192.205.0.17
+
+```
+
+#### JORGE
+
+Konfigurasi sebagai WEB server
+
+```
+auto eth0
+iface eth0 inet static
+	address 192.205.0.27
+	netmask 255.255.255.248
+	gateway 192.205.0.25
+```
+
+#### Maingate
+
+Konfigurasi sebagai WEB server
+
+```
+auto eth0
+iface eth0 inet static
+	address 192.205.0.26
+	netmask 255.255.255.248
+	gateway 192.205.0.25
+
+```
+
+#### BLUENO(100Host)
+
+Client
+```
+auto eth0
+iface eth0 inet dhcp
+	address 192.205.0.130
+	netmask 255.255.255.128
+gateway 192.205.0.129
+
+```
+#### CIPHER(700Host)
+
+Client
+```
+auto eth0
+iface eth0 inet dhcp
+	address 192.205.4.2
+	netmask 255.255.252.0
+gateway 192.205.4.1
+
+```
+
+#### ELENA(300Host)
+
+Client
+```
+auto eth0
+iface eth0 inet dhcp
+	address 192.205.2.2
+	netmask 255.255.254.0
+	gateway 192.205.2.1
+
+```
+
+#### FUKUROU(200Host)
+
+Client
+```
+auto eth0
+iface eth0 inet dhcp
+	address 192.205.1.2
+	netmask 255.255.255.0
+	gateway 192.205.1.1
+```
+
+
+
+
 ### Setting DHCP Relay 
 
 dengan meletakkan command tersebut di script masing masing 
@@ -148,6 +326,7 @@ OPTIONS=""
 /etc/init.d/isc-dhcp-relay restart
 
 ```
+### Setting DHCP SERVER
 
 #### Guanhao
 
@@ -231,6 +410,28 @@ Dengan cara tersebut maka dapat berjalan tanpa MASQUERADE.
 
 ## Soal 2
 Kalian diminta untuk mendrop semua akses HTTP dari luar Topologi kalian pada server yang merupakan DHCP Server dan DNS Server demi menjaga keamanan.
+
+Sehingga solusinya dengan melakukan drop atau recject connection apabila melalui `port 80` yang merupakan port `HTTP`
+
+### FOOSHA
+```
+iptables -F
+iptables -t nat -F
+iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE -s 192.205.0.0/16
+iptables -A INPUT -p tcp --dport 80 -s 192.205.0.17 -j DROP
+
+```
+
+### Water7
+
+```
+iptables -A FORWARD -d 192.205.0.16/29 -p tcp --dport 80 -j REJECT
+
+```
+
+
+
+
 
 ## Soal 3
 Karena kelompok kalian maksimal terdiri dari 3 orang. Luffy meminta kalian untuk membatasi DHCP dan DNS Server hanya boleh menerima maksimal 3 koneksi ICMP secara bersamaan menggunakan iptables, selebihnya didrop.
