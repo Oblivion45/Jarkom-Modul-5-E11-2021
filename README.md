@@ -78,6 +78,7 @@ Untuk Dapat melakukan konfigurasi Foosha tanpa MASQUERADE maka kami menggunakan 
 iptables -F
 iptables -t nat -F
 iptables -t nat -A POSTROUTING -s 192.205.0.0/16 -o eth0 -j SNAT --to 192.168.1$.168.122.223
+
 ```
 Dengan cara tersebut maka dapat berjalan tanpa MASQUERADE.
 
