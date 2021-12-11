@@ -72,6 +72,15 @@ Tugas berikutnya adalah memberikan ip pada subnet Blueno, Cipher, Fukurou, dan E
 ## Soal 1
 Agar topologi yang kalian buat dapat mengakses keluar, kalian diminta untuk mengkonfigurasi Foosha menggunakan iptables, tetapi Luffy tidak ingin menggunakan MASQUERADE.
 
+Untuk Dapat melakukan konfigurasi Foosha tanpa MASQUERADE maka kami menggunakan command `SNAT`
+
+```
+iptables -F
+iptables -t nat -F
+iptables -t nat -A POSTROUTING -s 192.205.0.0/16 -o eth0 -j SNAT --to 192.168.1$.168.122.223
+```
+Dengan cara tersebut maka dapat berjalan tanpa MASQUERADE.
+
 ## Soal 2
 Kalian diminta untuk mendrop semua akses HTTP dari luar Topologi kalian pada server yang merupakan DHCP Server dan DNS Server demi menjaga keamanan.
 
